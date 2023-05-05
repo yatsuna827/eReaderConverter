@@ -331,6 +331,58 @@ namespace eReaderConverter
 
             return bmp;
         }
+        private static Bitmap DrawDot2x(this bool[][] dotData, int margin = 0)
+        {
+            const int w = 35;
+            const int h = 40;
+            var bmp = new Bitmap((w * 28 + 5) * 2 + margin * 2, h * 2 + margin * 2);
+
+            // 29個の大ドットと、大ドットを縦に結ぶアドレスバーを描画する
+            for (int i = 0; i < 29; i++)
+            {
+                var offsetX = (i * 35 * 2) + margin;
+                var offsetY = margin;
+
+                bmp.DotBigDot2x(offsetX, offsetY);
+                bmp.DotBigDot2x(offsetX, offsetY + 35 * 2);
+
+                for (int j = 0; j < addressBar[i].Length; j++)
+                {
+                    if (addressBar[i][j])
+                        bmp.Dot2x(offsetX, offsetY, 2, j + 7);
+                }
+            }
+
+            // 大ドットを横に結ぶ点線を描画する
+            for (int i = 0; i < 28; i++)
+            {
+                var offsetX = (i * 35 * 2 + margin);
+                var offsetY = margin;
+
+                for (int k = 0; k < 6; k++)
+                {
+                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 2);
+                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 2);
+                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 37);
+                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 37);
+                }
+            }
+
+            for (int i = 0; i < dotData.Length; i++)
+            {
+                var blockData = dotData[i];
+                var offsetX = margin + i * 35 * 2;
+                var offsetY = margin;
+                for (int k = 0; k < blockData.Length; k++)
+                {
+                    if (blockData[k])
+                        bmp.Dot2x(offsetX, offsetY, toDotBlockCoordinate[k].X, toDotBlockCoordinate[k].Y);
+                }
+            }
+
+            return bmp;
+        }
+
         private static void DotBigDot(this Bitmap bmp, int offsetX, int offsetY)
         {
             for (int x = 0; x < 5; x++)
@@ -345,11 +397,43 @@ namespace eReaderConverter
                 }
             }
         }
+        private static void DotBigDot2x(this Bitmap bmp, int offsetX, int offsetY)
+        {
+            for (int x = 0; x < 5; x++)
+            {
+                for (int y = 0; y < 5; y++)
+                {
+                    if (x == 0 && y == 0) continue;
+                    if (x == 4 && y == 0) continue;
+                    if (x == 0 && y == 4) continue;
+                    if (x == 4 && y == 4) continue;
+                    bmp.SetPixel(2 * x + offsetX, 2 * y + offsetY, Color.Black);
+                    bmp.SetPixel(2 * x + 1 + offsetX, 2 * y + offsetY, Color.Black);
+                    bmp.SetPixel(2 * x + offsetX, 2 * y + 1 + offsetY, Color.Black);
+                    bmp.SetPixel(2 * x + 1 + offsetX, 2 * y + 1 + offsetY, Color.Black);
+                }
+            }
 
-        public static Bitmap Bin2Bmp(this byte[] bin, int margin = 0)
-            => bin.Bin2Raw().Raw2Bmp(margin);
-        public static Bitmap Raw2Bmp(this byte[] raw, int margin = 0)
-            => raw.Raw2DotData().DrawDot(margin);
+            bmp.SetPixel(offsetX + 1, offsetY + 1, Color.Black);
+            bmp.SetPixel(offsetX + 8, offsetY + 1, Color.Black);
+            bmp.SetPixel(offsetX + 1, offsetY + 8, Color.Black);
+            bmp.SetPixel(offsetX + 8, offsetY + 8, Color.Black);
+        }
+
+        private static void Dot2x(this Bitmap bmp, int offsetX, int offsetY, int x, int y)
+        {
+            var _x = offsetX + x * 2;
+            var _y = offsetY + y * 2;
+
+            bmp.SetPixel(_x + 0, _y + 0, Color.Gray);
+            bmp.SetPixel(_x + 0, _y + 1, Color.Gray);
+            bmp.SetPixel(_x + 1, _y + 0, Color.Gray);
+            bmp.SetPixel(_x + 1, _y + 1, Color.Black);
+        }
+
+        public static Bitmap Bin2Bmp(this byte[] bin, int margin = 0, bool x2 = false)
+            => bin.Bin2Raw().Raw2Bmp(margin, x2);
+        public static Bitmap Raw2Bmp(this byte[] raw, int margin = 0, bool x2 = false)
+            => x2 ? raw.Raw2DotData().DrawDot2x(margin) : raw.Raw2DotData().DrawDot(margin);
     }
-
 }

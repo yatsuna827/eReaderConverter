@@ -331,7 +331,7 @@ namespace eReaderConverter
 
             return bmp;
         }
-        private static Bitmap DrawDot2x(this bool[][] dotData, int margin = 0)
+        private static Bitmap DrawDot2x(this bool[][] dotData, int margin = 0, bool blur = false)
         {
             const int w = 35;
             const int h = 40;
@@ -349,7 +349,7 @@ namespace eReaderConverter
                 for (int j = 0; j < addressBar[i].Length; j++)
                 {
                     if (addressBar[i][j])
-                        bmp.Dot2x(offsetX, offsetY, 2, j + 7);
+                        bmp.Dot2x(offsetX, offsetY, 2, j + 7, blur);
                 }
             }
 
@@ -361,10 +361,10 @@ namespace eReaderConverter
 
                 for (int k = 0; k < 6; k++)
                 {
-                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 2);
-                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 2);
-                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 37);
-                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 37);
+                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 2, blur);
+                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 2, blur);
+                    bmp.Dot2x(offsetX, offsetY, 8 + k * 2, 37, blur);
+                    bmp.Dot2x(offsetX, offsetY, 21 + k * 2, 37, blur);
                 }
             }
 
@@ -376,7 +376,7 @@ namespace eReaderConverter
                 for (int k = 0; k < blockData.Length; k++)
                 {
                     if (blockData[k])
-                        bmp.Dot2x(offsetX, offsetY, toDotBlockCoordinate[k].X, toDotBlockCoordinate[k].Y);
+                        bmp.Dot2x(offsetX, offsetY, toDotBlockCoordinate[k].X, toDotBlockCoordinate[k].Y, blur);
                 }
             }
 
@@ -420,20 +420,23 @@ namespace eReaderConverter
             bmp.SetPixel(offsetX + 8, offsetY + 8, Color.Black);
         }
 
-        private static void Dot2x(this Bitmap bmp, int offsetX, int offsetY, int x, int y)
+        private static void Dot2x(this Bitmap bmp, int offsetX, int offsetY, int x, int y, bool blur)
         {
             var _x = offsetX + x * 2;
             var _y = offsetY + y * 2;
 
-            bmp.SetPixel(_x + 0, _y + 0, Color.Gray);
-            bmp.SetPixel(_x + 0, _y + 1, Color.Gray);
-            bmp.SetPixel(_x + 1, _y + 0, Color.Gray);
+            if (blur)
+            {
+                bmp.SetPixel(_x + 0, _y + 0, Color.Gray);
+                bmp.SetPixel(_x + 0, _y + 1, Color.Gray);
+                bmp.SetPixel(_x + 1, _y + 0, Color.Gray);
+            }
             bmp.SetPixel(_x + 1, _y + 1, Color.Black);
         }
 
-        public static Bitmap Bin2Bmp(this byte[] bin, int margin = 0, bool x2 = false)
-            => bin.Bin2Raw().Raw2Bmp(margin, x2);
-        public static Bitmap Raw2Bmp(this byte[] raw, int margin = 0, bool x2 = false)
-            => x2 ? raw.Raw2DotData().DrawDot2x(margin) : raw.Raw2DotData().DrawDot(margin);
+        public static Bitmap Bin2Bmp(this byte[] bin, int margin = 0, bool x2 = false, bool blur = false)
+            => bin.Bin2Raw().Raw2Bmp(margin, x2, blur);
+        public static Bitmap Raw2Bmp(this byte[] raw, int margin = 0, bool x2 = false, bool blur = false)
+            => x2 ? raw.Raw2DotData().DrawDot2x(margin, blur) : raw.Raw2DotData().DrawDot(margin);
     }
 }

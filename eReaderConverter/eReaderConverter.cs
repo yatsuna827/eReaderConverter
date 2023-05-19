@@ -413,11 +413,6 @@ namespace eReaderConverter
                     bmp.SetPixel(2 * x + 1 + offsetX, 2 * y + 1 + offsetY, Color.Black);
                 }
             }
-
-            bmp.SetPixel(offsetX + 1, offsetY + 1, Color.Black);
-            bmp.SetPixel(offsetX + 8, offsetY + 1, Color.Black);
-            bmp.SetPixel(offsetX + 1, offsetY + 8, Color.Black);
-            bmp.SetPixel(offsetX + 8, offsetY + 8, Color.Black);
         }
 
         private static void Dot2x(this Bitmap bmp, int offsetX, int offsetY, int x, int y, bool blur)
